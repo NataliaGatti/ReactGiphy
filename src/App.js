@@ -1,23 +1,43 @@
-import logo from './logo.svg';
 import './App.css';
+import { useState } from "react";
+import axios from "axios";
+import Searchbar from "./components/Searchbar";
+import Gif from "./components/Gif";
+import GifList from "./components/GifList";
+
+const GIPHY_API_KEY = "9W9SxGGmDbyGumWdxtnMwh221Yo8GAxl";
 
 function App() {
+  const [gifs, setGifs] = useState([]);
+  const [selectedGif, setSelectedGif] = useState({
+    id: "xT9IgDEI1iZyb2wqo8",
+    url: "https://media4.giphy.com/media/xT9IgDEI1iZyb2wqo8/giphy.gif?cid=790b76117b5f7ea79f5874d2779a0b1a61e42b00cbbf66a9&rid=giphy.gif&ct=g",
+  })
+
+  const searchFunction = (query) => {
+    const gifEndpoint = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${query}&limit=10`;
+    axios.get(gifEndpoint).then((response) => {
+      console.log(response);
+      setGifs(
+        response.data.data.map((gif) => ({
+          id: gif.id,
+          url: gif.images.downsized.url,
+        }))
+      );
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <div className="left-scene">
+        <Searchbar searchFunction={searchFunction} />
+        <div className="selected-gif">
+          <Gif id={selectedGif.id} url={selectedGif.url}></Gif>
+        </div>
+      </div>
+      <div className="right-scene">
+        <GifList gifs={gifs} selectGif={setSelectedGif} />
+      </div>
     </div>
   );
 }
